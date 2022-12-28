@@ -79,3 +79,9 @@ fabric.properties
 
 # Entire JetBrains stuff
 .idea
+
+# Environment
+.env
+
+# Dummy files
+response.json
