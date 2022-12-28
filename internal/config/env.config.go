@@ -51,11 +51,15 @@ func (env *ENV) GetCurrencyIDs() []string {
 	return strings.Split(strCleanUp(env.CurrencyIDs), ",")
 }
 
+func (env *ENV) GetCasinoID() string {
+	return strCleanUp(env.CasinoID)
+}
+
 // strCleanUp removes all the extra characters added by different OSs environments.
 func strCleanUp(strToCleanUp string) string {
 	var builder strings.Builder
 	for _, char := range strToCleanUp {
-		if (char == ',') || (char >= 65 && char <= 90) || (char >= 48 && char <= 57) {
+		if (char == ',') || (char >= 65 && char <= 90) || (char >= 97 && char <= 122) || (char >= 48 && char <= 57) {
 			builder.WriteRune(char)
 		}
 	}
