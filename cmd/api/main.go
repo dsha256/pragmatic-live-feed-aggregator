@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/config"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/repo"
-	"github.com/dsha256/pragmatic-live-feed-aggregator/pkg/dto"
+	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/ws"
 	"github.com/go-redis/redis/v8"
-	"log"
 )
 
 func main() {
+	env := config.ENV{}
+	env.Load()
+
 	ctx := context.Background()
 
 	redisClient := redis.NewClient(&redis.Options{
@@ -17,10 +20,11 @@ func main() {
 		DB:       0,
 	})
 	redisRepo := repo.NewRedisRepository(redisClient)
-	_ = redisRepo
-	redisRepo.AddTable(ctx, dto.PragmaticTable{TableId: "255", Currency: "USD"})
-	redisRepo.AddTable(ctx, dto.PragmaticTable{TableId: "256", Currency: "EUR"})
-	redisRepo.AddTable(ctx, dto.PragmaticTable{TableId: "256", Currency: "USD"})
-	a, _ := redisRepo.GetTableByTableAndCurrencyIDs(ctx, "256", "USD")
-	log.Println(a)
+
+	wsURL := env.PragmaticFeedWsURL
+	casinoID := env.GetCasinoID()
+	tableIDs := env.GetTableIDs()
+	currencyIDs := env.GetCurrencyIDs()
+	wsClient := ws.NewClient(ctx, &redisRepo, wsURL, casinoID, tableIDs, currencyIDs)
+	wsClient.StartClients()
 }
