@@ -30,7 +30,7 @@ func (db *RedisRepository) AddTable(ctx context.Context, table dto.PragmaticTabl
 	db.Lock()
 	defer db.Unlock()
 
-	redisID := table.CreateTableCurrencyID()
+	redisID := generateIDFromTableAndCurrencyIDs(table.TableId, table.Currency)
 
 	jsonPragmaticTable, err := json.Marshal(table)
 	if err != nil {
@@ -47,7 +47,7 @@ func (db *RedisRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, ta
 
 	var pragmaticTable dto.PragmaticTable
 
-	tableUniqueID := tableID + currencyID
+	tableUniqueID := generateIDFromTableAndCurrencyIDs(tableID, currencyID)
 	table, err := db.Client.Get(ctx, tableUniqueID).Result()
 	switch {
 	case err == redis.Nil:
@@ -64,12 +64,34 @@ func (db *RedisRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, ta
 	return pragmaticTable, nil
 }
 
-func (db *RedisRepository) ListTables(ctx context.Context) ([]dto.PragmaticTable, error) {
+func (db *RedisRepository) ListTables(ctx context.Context) ([]dto.PragmaticTableWithID, error) {
 	db.Lock()
 	defer db.Unlock()
 
-	var pragmaticTables []dto.PragmaticTable
-	// TODO: Implement me
+	var pragmaticTables []dto.PragmaticTableWithID
+	var cursor uint64
+	var table string
+
+	keys, cursor, err := db.Client.Scan(ctx, cursor, "*:*", 0).Result()
+	if err != nil {
+		return pragmaticTables, err
+	}
+
+	for _, key := range keys {
+		table, err = db.Client.Get(ctx, key).Result()
+		if err != nil {
+			return []dto.PragmaticTableWithID{}, err
+		}
+		var pragmaticTableWithID dto.PragmaticTableWithID
+		var pragmaticTable dto.PragmaticTable
+		err := json.Unmarshal([]byte(table), &pragmaticTable)
+		if err != nil {
+			return []dto.PragmaticTableWithID{}, err
+		}
+		pragmaticTableWithID.TableAndCurrencyID = key
+		pragmaticTableWithID.PragmaticTable = pragmaticTable
+		pragmaticTables = append(pragmaticTables, pragmaticTableWithID)
+	}
 
 	return pragmaticTables, nil
 }

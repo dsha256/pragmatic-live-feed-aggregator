@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/config"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/repo"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/server"
@@ -12,24 +13,31 @@ import (
 )
 
 func main() {
+	start()
+}
+
+func start() {
 	env := config.ENV{}
 	env.Load()
 
 	ctx := context.Background()
 
+	redisPort := env.GetRedisPort()
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     "localhost:" + redisPort,
 		Password: "",
 		DB:       0,
 	})
 	redisRepo := repo.NewRedisRepository(redisClient)
 
 	httpServer := server.NewHTTP(&redisRepo)
-	// TODO: Get port from env vars
-	err := http.ListenAndServe(":8080", httpServer)
-	if err != nil {
-		log.Printf("can't run the server on port 8080: %v", err)
-	}
+	serverPort := env.GetServerPort()
+	go func() {
+		err := http.ListenAndServe(fmt.Sprintf(":%s", serverPort), httpServer)
+		if err != nil {
+			log.Fatalf("Error starting a server on port %s: %s", serverPort, err)
+		}
+	}()
 
 	wsURL := env.PragmaticFeedWsURL
 	casinoID := env.GetCasinoID()
