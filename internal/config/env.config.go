@@ -12,6 +12,8 @@ const (
 	CasinoID            = "CASINO_ID"
 	TableIDs            = "TABLE_IDS"
 	CurrencyIDs         = "CURRENCY_IDS"
+	RedisPort           = "REDIS_PORT"
+	ServerPort          = "SERVER_PORT"
 )
 
 type ENV struct {
@@ -21,6 +23,8 @@ type ENV struct {
 	CasinoID            string
 	TableIDs            string
 	CurrencyIDs         string
+	RedisPort           string
+	ServerPort          string
 }
 
 func (env *ENV) Load() *ENV {
@@ -30,6 +34,8 @@ func (env *ENV) Load() *ENV {
 	env.CasinoID = os.Getenv(CasinoID)
 	env.TableIDs = os.Getenv(TableIDs)
 	env.CurrencyIDs = os.Getenv(CurrencyIDs)
+	env.RedisPort = os.Getenv(RedisPort)
+	env.ServerPort = os.Getenv(ServerPort)
 
 	// TODO: check on empty
 	//values := reflect.ValueOf(.config)
@@ -53,6 +59,14 @@ func (env *ENV) GetCurrencyIDs() []string {
 
 func (env *ENV) GetCasinoID() string {
 	return strCleanUp(env.CasinoID)
+}
+
+func (env *ENV) GetRedisPort() string {
+	return strCleanUp(env.RedisPort)
+}
+
+func (env *ENV) GetServerPort() string {
+	return strCleanUp(env.ServerPort)
 }
 
 // strCleanUp removes all the extra characters added by different OSs environments.
