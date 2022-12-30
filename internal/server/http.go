@@ -8,7 +8,7 @@ import (
 
 type HTTP struct {
 	http.Handler
-	repo   repo.RedisRepository
+	repo   repo.InMemoryDataBase
 	engine *gin.Engine
 }
 

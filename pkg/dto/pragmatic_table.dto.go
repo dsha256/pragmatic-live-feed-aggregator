@@ -32,8 +32,8 @@ type PragmaticTable struct {
 
 type PragmaticTableWithID struct {
 	// tID = 100; cID = 200 => TableAndCurrencyID = "100:200"
-	TableAndCurrencyID string         `json:"table_and_currency_id"`
-	PragmaticTable     PragmaticTable `json:"pragmatic_table"`
+	TableAndCurrencyID string         `json:"tableAndCurrencyID,omitempty"`
+	PragmaticTable     PragmaticTable `json:"pragmaticTable"`
 }
 
 //func (pt PragmaticTable) Marshal() ([]byte, error) {
