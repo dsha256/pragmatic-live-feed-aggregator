@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/config"
+	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/pusher"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/repo"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/server"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/ws"
@@ -39,6 +40,20 @@ func start() {
 		}
 	}()
 
+	pusherClient := pusher.NewClient(
+		env.GetPusherAppID(),
+		env.GetPusherKey(),
+		env.GetPusherSecret(),
+		env.GetPusherCluster(),
+		env.GetPusherChannelID(),
+		env.GetPusherPeriodMinutes(),
+		&redisRepo,
+	)
+	pusherClient.StartPushing(ctx)
+
+	// TODO: improve the runner func related processes synchronization using the channels to avoid strict ordering.
+	// At this time, the code below must be at the end of the runner func, cause it takes an additional responsibility
+	// to force the main thread to wait until all the other services are done their works.
 	wsURL := env.PragmaticFeedWsURL
 	casinoID := env.GetCasinoID()
 	tableIDs := env.GetTableIDs()
