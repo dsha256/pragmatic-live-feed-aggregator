@@ -22,7 +22,7 @@ func NewHTTP(
 		Handler: engine,
 		engine:  engine,
 	}
-	pragmaticNewsFeedRoute := engine.Group("pragmatic_news_feed/v1")
+	pragmaticNewsFeedRoute := engine.Group("api/v1/pragmatic_news_feed")
 
 	pragmaticTablesHandler := newPragmaticTableHandler(repo)
 	pragmaticTablesHandler.registerRoutes(pragmaticNewsFeedRoute)
