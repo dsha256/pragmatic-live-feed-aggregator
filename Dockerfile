@@ -1,0 +1,17 @@
+# Build stage
+FROM golang:1.19-alpine AS builder
+RUN apk add --no-cache git
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+COPY . .
+RUN CGO_ENABLED=0 go build -o ./bin/main ./cmd/api/main.go
+
+# Run stage
+FROM alpine:3.16
+WORKDIR /root/
+COPY --from=builder ./app/bin/main ./
+COPY --from=builder ./app/.env ./
+RUN   export $(grep -v '^#' .env | xargs -d '\n')
+EXPOSE ${SERVER_PORT}
+CMD [ "./main" ]

@@ -25,7 +25,7 @@ func start() {
 
 	redisPort := env.GetRedisPort()
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "localhost:" + redisPort,
+		Addr:     "redis:" + redisPort,
 		Password: "",
 		DB:       0,
 	})
