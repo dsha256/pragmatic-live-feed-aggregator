@@ -11,6 +11,8 @@ RUN CGO_ENABLED=0 go build -o ./bin/main ./cmd/api/main.go
 # Run stage
 FROM alpine:3.16
 
+RUN apk add --no-cache
+
 RUN mkdir /plfa
 WORKDIR plfa
 
