@@ -20,7 +20,6 @@ func (h *pragmaticTableHandler) registerRoutes(r *gin.RouterGroup) {
 }
 
 func (h *pragmaticTableHandler) PragmaticTable(c *gin.Context) {
-	// TODO: Implement an appropriate method om the DB layer
 	pragmaticTables, err := h.repo.ListTables(c)
 	if err != nil {
 		handleErrResp(c, "error getting pragmatic tables data from the db", http.StatusInternalServerError)
