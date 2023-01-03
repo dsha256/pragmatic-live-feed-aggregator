@@ -81,8 +81,8 @@ docker-compose up
         "data": null,
         "error": true,
         "message": "A specific error message here",
-        "code": XXX - Depend on a specific case,
-        "status": XXX - Depend on a specific case
+        "code": XXX - Depends osn a specific case,
+        "status": XXX - Depends on a specific case
     }
     ```
    
