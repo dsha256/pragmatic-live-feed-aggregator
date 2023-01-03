@@ -5,12 +5,12 @@ import (
 )
 
 type Aggregator struct {
-	*LiveFeedRepository
+	*RedisLiveFeedRepository
 	db *redis.Client
 }
 
 func NewAggregator(db *redis.Client) *Aggregator {
-	return &Aggregator{LiveFeedRepository: NewLiveFeedRepository(db), db: db}
+	return &Aggregator{RedisLiveFeedRepository: NewRedisLiveFeedRepository(db), db: db}
 }
 
 // InTx runs passed func in tx.

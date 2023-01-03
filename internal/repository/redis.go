@@ -14,22 +14,17 @@ var (
 	ErrRedisInternal   = errors.New("redis internal error")
 )
 
-type LiveFeedRepository struct {
-	//sync.RWMutex
+type RedisLiveFeedRepository struct {
 	client *redis.Client
 }
 
-func NewLiveFeedRepository(client *redis.Client) *LiveFeedRepository {
-	return &LiveFeedRepository{
-		//sync.RWMutex{},
+func NewRedisLiveFeedRepository(client *redis.Client) *RedisLiveFeedRepository {
+	return &RedisLiveFeedRepository{
 		client,
 	}
 }
 
-func (db *LiveFeedRepository) AddTable(ctx context.Context, table dto.PragmaticTable) error {
-	//db.Lock()
-	//defer db.Unlock()
-
+func (db *RedisLiveFeedRepository) AddTable(ctx context.Context, table dto.PragmaticTable) error {
 	redisID := utils.GenerateIDFromTableAndCurrencyIDs(table.TableId, table.Currency)
 
 	jsonPragmaticTable, err := json.Marshal(table)
@@ -41,10 +36,7 @@ func (db *LiveFeedRepository) AddTable(ctx context.Context, table dto.PragmaticT
 	return nil
 }
 
-func (db *LiveFeedRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, tableID, currencyID string) (dto.PragmaticTable, error) {
-	//db.Lock()
-	//defer db.Unlock()
-
+func (db *RedisLiveFeedRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, tableID, currencyID string) (dto.PragmaticTable, error) {
 	var pragmaticTable dto.PragmaticTable
 
 	tableUniqueID := utils.GenerateIDFromTableAndCurrencyIDs(tableID, currencyID)
@@ -64,10 +56,7 @@ func (db *LiveFeedRepository) GetTableByTableAndCurrencyIDs(ctx context.Context,
 	return pragmaticTable, nil
 }
 
-func (db *LiveFeedRepository) ListTables(ctx context.Context) ([]dto.PragmaticTableWithID, error) {
-	//db.Lock()
-	//defer db.Unlock()
-
+func (db *RedisLiveFeedRepository) ListTables(ctx context.Context) ([]dto.PragmaticTableWithID, error) {
 	var pragmaticTables []dto.PragmaticTableWithID
 	var cursor uint64
 	var table string
