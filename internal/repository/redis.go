@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/pkg/dto"
+	"github.com/dsha256/pragmatic-live-feed-aggregator/pkg/utils"
 	"github.com/go-redis/redis/v8"
-	"sync"
 )
 
 var (
@@ -15,22 +15,22 @@ var (
 )
 
 type LiveFeedRepository struct {
-	sync.RWMutex
+	//sync.RWMutex
 	client *redis.Client
 }
 
 func NewLiveFeedRepository(client *redis.Client) *LiveFeedRepository {
 	return &LiveFeedRepository{
-		sync.RWMutex{},
+		//sync.RWMutex{},
 		client,
 	}
 }
 
 func (db *LiveFeedRepository) AddTable(ctx context.Context, table dto.PragmaticTable) error {
-	db.Lock()
-	defer db.Unlock()
+	//db.Lock()
+	//defer db.Unlock()
 
-	redisID := generateIDFromTableAndCurrencyIDs(table.TableId, table.Currency)
+	redisID := utils.GenerateIDFromTableAndCurrencyIDs(table.TableId, table.Currency)
 
 	jsonPragmaticTable, err := json.Marshal(table)
 	if err != nil {
@@ -42,12 +42,12 @@ func (db *LiveFeedRepository) AddTable(ctx context.Context, table dto.PragmaticT
 }
 
 func (db *LiveFeedRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, tableID, currencyID string) (dto.PragmaticTable, error) {
-	db.Lock()
-	defer db.Unlock()
+	//db.Lock()
+	//defer db.Unlock()
 
 	var pragmaticTable dto.PragmaticTable
 
-	tableUniqueID := generateIDFromTableAndCurrencyIDs(tableID, currencyID)
+	tableUniqueID := utils.GenerateIDFromTableAndCurrencyIDs(tableID, currencyID)
 	table, err := db.client.Get(ctx, tableUniqueID).Result()
 	switch {
 	case err == redis.Nil:
@@ -65,8 +65,8 @@ func (db *LiveFeedRepository) GetTableByTableAndCurrencyIDs(ctx context.Context,
 }
 
 func (db *LiveFeedRepository) ListTables(ctx context.Context) ([]dto.PragmaticTableWithID, error) {
-	db.Lock()
-	defer db.Unlock()
+	//db.Lock()
+	//defer db.Unlock()
 
 	var pragmaticTables []dto.PragmaticTableWithID
 	var cursor uint64
