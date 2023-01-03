@@ -1,31 +1,27 @@
 package server
 
 import (
-	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/repo"
+	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/pragmaticlivefeed"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type HTTP struct {
 	http.Handler
-	repo   repo.InMemoryDataBase
-	engine *gin.Engine
+	service pragmaticlivefeed.Service
+	engine  *gin.Engine
 }
 
-func NewHTTP(
-	repo *repo.RedisRepository,
-) *HTTP {
+func NewHTTP(pragmaticLiveFeedSvc pragmaticlivefeed.Service) *HTTP {
 	engine := gin.New()
-	// TODO: fix as will have domains
+	// TODO: fix as will have do mains
 	engine.Use(CORS())
-	server := &HTTP{
-		Handler: engine,
-		engine:  engine,
-	}
-	pragmaticNewsFeedRoute := engine.Group("api/v1/pragmatic_news_feed")
+	server := &HTTP{Handler: engine, engine: engine}
 
-	pragmaticTablesHandler := newPragmaticTableHandler(repo)
-	pragmaticTablesHandler.registerRoutes(pragmaticNewsFeedRoute)
+	pragmaticLiveFeedRoute := engine.Group("api/v1/pragmatic_live_feed")
+
+	pragmaticTablesHandler := newPragmaticTableHandler(pragmaticLiveFeedSvc)
+	pragmaticTablesHandler.registerRoutes(pragmaticLiveFeedRoute)
 
 	return server
 }
