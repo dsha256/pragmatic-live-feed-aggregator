@@ -1,76 +1,73 @@
-package ws
+package pragmaticlivefeed
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/repo"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/pkg/dto"
+	"github.com/gorilla/websocket"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
 	"time"
-
-	// golang.org/x/net/websocket currently lacks some features: https://pkg.go.dev/golang.org/x/net/websocket
-	"github.com/gorilla/websocket"
 )
 
-type WS struct {
+var done chan any
+var interrupt chan os.Signal
+
+type wsService struct {
 	sync.RWMutex
 	ctx         context.Context
-	DB          repo.InMemoryDataBase
-	WSURL       string
-	CasinoID    string
-	TableIDs    []string
-	CurrencyIDs []string
+	repo        AggregateRepository
+	wsURL       string
+	casinoID    string
+	tableIDs    []string
+	currencyIDs []string
 }
 
-func NewClient(
+func NewWSService(
 	ctx context.Context,
-	db repo.InMemoryDataBase,
+	repo AggregateRepository,
 	wsURL string,
 	casinoID string,
 	tableIDs []string,
 	currencyIDs []string,
-) WS {
-	return WS{
+) *wsService {
+	return &wsService{
 		ctx:         ctx,
-		DB:          db,
-		WSURL:       wsURL,
-		CasinoID:    casinoID,
-		TableIDs:    tableIDs,
-		CurrencyIDs: currencyIDs,
+		repo:        repo,
+		wsURL:       wsURL,
+		casinoID:    casinoID,
+		tableIDs:    tableIDs,
+		currencyIDs: currencyIDs,
 	}
 }
 
-var done chan any
-var interrupt chan os.Signal
-var socketUrl = "wss://dga.pragmaticplaylive.net/ws"
-
-func (ws *WS) StartClients() {
+func (s *wsService) StartClients() {
 	done = make(chan interface{})    // Channel to indicate that the receiverHandler is done
 	interrupt = make(chan os.Signal) // Channel to listen for interrupt signal to terminate gracefully
 
 	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
 
 	wg := sync.WaitGroup{}
-	for _, message := range ws.generateWSMessages() {
+	generatedMsgs := generateWSMessages(s.casinoID, s.tableIDs, s.currencyIDs)
+	for _, message := range generatedMsgs {
 		log.Println(string(message))
 
 		wg.Add(1)
 		msg := message
 		go func([]byte) {
-			go ws.startClient(msg, &wg)
+			go s.StartClient(msg, &wg)
 		}(msg)
 	}
 
 	wg.Wait()
 }
 
-func (ws *WS) pushReceivedDataToDB(connection *websocket.Conn) {
+func (s *wsService) PushReceivedDataToDB(conn *websocket.Conn) {
 	for {
-		_, msg, err := connection.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Error in receive:", err)
 			return
@@ -81,26 +78,26 @@ func (ws *WS) pushReceivedDataToDB(connection *websocket.Conn) {
 			log.Println("Error in unmarshal:", err)
 		}
 
-		ws.Lock()
-		err = ws.DB.AddTable(ws.ctx, pragmaticTable)
-		ws.Unlock()
+		s.Lock()
+		err = s.repo.AddTable(s.ctx, pragmaticTable)
+		s.Unlock()
 		if err != nil {
 			log.Println("Error in adding table to the DB:", err)
 		}
 	}
 }
 
-func (ws *WS) startClient(msg []byte, wg *sync.WaitGroup) {
+func (s *wsService) StartClient(msg []byte, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	socketUrl := socketUrl
+	socketUrl := s.wsURL
 	conn, _, err := websocket.DefaultDialer.Dial(socketUrl, nil)
 	if err != nil {
 		log.Fatal("Error connecting to Websocket Server:", err)
 	}
 	defer conn.Close()
 
-	go ws.pushReceivedDataToDB(conn)
+	go s.PushReceivedDataToDB(conn)
 
 	for {
 		select {
@@ -136,12 +133,12 @@ func (ws *WS) startClient(msg []byte, wg *sync.WaitGroup) {
 	}
 }
 
-func (ws *WS) generateWSMessages() [][]byte {
+func generateWSMessages(casinoID string, tableIDs, currencyIDs []string) [][]byte {
 	var messages [][]byte
 	messageTemplate := "{\"type\":\"subscribe\",\"key\":\"%s\",\"casinoId\":\"%s\",\"currency\":\"%s\"}"
-	for _, tableID := range ws.TableIDs {
-		for _, currencyID := range ws.CurrencyIDs {
-			messages = append(messages, []byte(fmt.Sprintf(messageTemplate, tableID, ws.CasinoID, currencyID)))
+	for _, tableID := range tableIDs {
+		for _, currencyID := range currencyIDs {
+			messages = append(messages, []byte(fmt.Sprintf(messageTemplate, tableID, casinoID, currencyID)))
 		}
 	}
 	return messages

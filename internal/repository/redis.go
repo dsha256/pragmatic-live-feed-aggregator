@@ -1,4 +1,4 @@
-package repo
+package repository
 
 import (
 	"context"
@@ -14,19 +14,19 @@ var (
 	ErrRedisInternal   = errors.New("redis internal error")
 )
 
-type RedisRepository struct {
+type LiveFeedRepository struct {
 	sync.RWMutex
-	Client *redis.Client
+	client *redis.Client
 }
 
-func NewRedisRepository(client *redis.Client) RedisRepository {
-	return RedisRepository{
+func NewLiveFeedRepository(client *redis.Client) *LiveFeedRepository {
+	return &LiveFeedRepository{
 		sync.RWMutex{},
 		client,
 	}
 }
 
-func (db *RedisRepository) AddTable(ctx context.Context, table dto.PragmaticTable) error {
+func (db *LiveFeedRepository) AddTable(ctx context.Context, table dto.PragmaticTable) error {
 	db.Lock()
 	defer db.Unlock()
 
@@ -37,18 +37,18 @@ func (db *RedisRepository) AddTable(ctx context.Context, table dto.PragmaticTabl
 		return err
 	}
 
-	db.Client.Set(ctx, redisID, jsonPragmaticTable, 0)
+	db.client.Set(ctx, redisID, jsonPragmaticTable, 0)
 	return nil
 }
 
-func (db *RedisRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, tableID, currencyID string) (dto.PragmaticTable, error) {
+func (db *LiveFeedRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, tableID, currencyID string) (dto.PragmaticTable, error) {
 	db.Lock()
 	defer db.Unlock()
 
 	var pragmaticTable dto.PragmaticTable
 
 	tableUniqueID := generateIDFromTableAndCurrencyIDs(tableID, currencyID)
-	table, err := db.Client.Get(ctx, tableUniqueID).Result()
+	table, err := db.client.Get(ctx, tableUniqueID).Result()
 	switch {
 	case err == redis.Nil:
 		return dto.PragmaticTable{}, ErrKeyDoesNotExist
@@ -64,7 +64,7 @@ func (db *RedisRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, ta
 	return pragmaticTable, nil
 }
 
-func (db *RedisRepository) ListTables(ctx context.Context) ([]dto.PragmaticTableWithID, error) {
+func (db *LiveFeedRepository) ListTables(ctx context.Context) ([]dto.PragmaticTableWithID, error) {
 	db.Lock()
 	defer db.Unlock()
 
@@ -72,13 +72,13 @@ func (db *RedisRepository) ListTables(ctx context.Context) ([]dto.PragmaticTable
 	var cursor uint64
 	var table string
 
-	keys, cursor, err := db.Client.Scan(ctx, cursor, "*:*", 0).Result()
+	keys, cursor, err := db.client.Scan(ctx, cursor, "*:*", 0).Result()
 	if err != nil {
 		return pragmaticTables, err
 	}
 
 	for _, key := range keys {
-		table, err = db.Client.Get(ctx, key).Result()
+		table, err = db.client.Get(ctx, key).Result()
 		if err != nil {
 			return []dto.PragmaticTableWithID{}, err
 		}

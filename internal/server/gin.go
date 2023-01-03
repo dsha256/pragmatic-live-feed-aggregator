@@ -12,7 +12,7 @@ func CORS() gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET"},
-		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type", "Content-Length"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Content-Length"},
 		ExposeHeaders:    nil,
 		MaxAge:           maxAge,
 		AllowCredentials: false,
