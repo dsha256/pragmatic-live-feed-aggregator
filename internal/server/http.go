@@ -14,7 +14,7 @@ type HTTP struct {
 
 func NewHTTP(pragmaticLiveFeedSvc pragmaticlivefeed.Service) *HTTP {
 	engine := gin.New()
-	// TODO: fix as will have do mains
+	// TODO: fix as will have domains
 	engine.Use(CORS())
 	server := &HTTP{Handler: engine, engine: engine}
 
