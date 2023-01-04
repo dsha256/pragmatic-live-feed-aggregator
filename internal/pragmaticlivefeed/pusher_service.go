@@ -21,13 +21,6 @@ func NewPusherService(
 	repo AggregateRepository,
 ) *pusherService {
 	return &pusherService{
-		//pusherClient: &pusher.client{
-		//	AppID:   appID,
-		//	Key:     key,
-		//	Secret:  secret,
-		//	Cluster: cluster,
-		//	Secure:  true,
-		//},
 		client:                client,
 		channelID:             channelID,
 		pusherPeriodInMinutes: pusherPeriodInMinutes,

@@ -12,7 +12,6 @@ const (
 	CasinoID            = "CASINO_ID"
 	TableIDs            = "TABLE_IDS"
 	CurrencyIDs         = "CURRENCY_IDS"
-	RedisPort           = "REDIS_PORT"
 	ServerPort          = "SERVER_PORT"
 	PusherChannelID     = "PUSHER_CHANNEL_ID"
 	PusherPeriodMinutes = "PUSHER_PERIOD_MINUTES"
@@ -27,7 +26,6 @@ type ENV struct {
 	CasinoID            string
 	TableIDs            string
 	CurrencyIDs         string
-	RedisPort           string
 	ServerPort          string
 	PusherChannelID     string
 	PusherPeriodMinutes string
@@ -42,7 +40,6 @@ func (env *ENV) Load() *ENV {
 	env.CasinoID = os.Getenv(CasinoID)
 	env.TableIDs = os.Getenv(TableIDs)
 	env.CurrencyIDs = os.Getenv(CurrencyIDs)
-	env.RedisPort = os.Getenv(RedisPort)
 	env.ServerPort = os.Getenv(ServerPort)
 	env.PusherChannelID = os.Getenv(PusherChannelID)
 	env.PusherPeriodMinutes = os.Getenv(PusherPeriodMinutes)
@@ -76,11 +73,6 @@ func (env *ENV) GetCurrencyIDs() []string {
 func (env *ENV) GetCasinoID() string {
 	panicOnEmptyEnvVar(CasinoID, env.CasinoID)
 	return strCleanUp(env.CasinoID)
-}
-
-func (env *ENV) GetRedisPort() string {
-	panicOnEmptyEnvVar(RedisPort, env.RedisPort)
-	return strCleanUp(env.RedisPort)
 }
 
 func (env *ENV) GetServerPort() string {

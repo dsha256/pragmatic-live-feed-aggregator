@@ -5,14 +5,10 @@ import (
 )
 
 type Aggregator struct {
-	*RedisLiveFeedRepository
+	*MapLiveFeedRepository
 	db *redis.Client
 }
 
-func NewAggregator(db *redis.Client) *Aggregator {
-	return &Aggregator{RedisLiveFeedRepository: NewRedisLiveFeedRepository(db), db: db}
+func NewAggregator() *Aggregator {
+	return &Aggregator{MapLiveFeedRepository: NewMapLiveFeedRepository()}
 }
-
-// InTx runs passed func in tx.
-//func (a *Aggregator) InTx(ctx context.Context, f pragmaticlivefeed.TxF) error {
-//}
