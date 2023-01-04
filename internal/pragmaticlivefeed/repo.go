@@ -14,14 +14,3 @@ type Repository interface {
 type AggregateRepository interface {
 	Repository
 }
-
-type AggregateRepositoryTx interface {
-	AggregateRepository
-	Transactional
-}
-
-type TxF func(ctx context.Context, repo AggregateRepository) error
-
-type Transactional interface {
-	InTx(context.Context, TxF) error
-}

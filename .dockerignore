@@ -2,3 +2,6 @@ response.json
 .gitignore
 docker-compose.yml
 Dockerfile
+dummy.go
+bin
+log.log
