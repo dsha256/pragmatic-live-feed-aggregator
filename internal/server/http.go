@@ -18,6 +18,9 @@ func NewHTTP(pragmaticLiveFeedSvc pragmaticlivefeed.Service) *HTTP {
 	engine.Use(CORS())
 	server := &HTTP{Handler: engine, engine: engine}
 
+	// Swagger UI
+	engine.StaticFS("/doc/swagger", http.Dir("doc/swagger"))
+
 	pragmaticLiveFeedRoute := engine.Group("api/v1/pragmatic_live_feed")
 
 	pragmaticTablesHandler := newPragmaticTableHandler(pragmaticLiveFeedSvc)
