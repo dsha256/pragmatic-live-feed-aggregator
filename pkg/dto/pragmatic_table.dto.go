@@ -35,21 +35,3 @@ type PragmaticTableWithID struct {
 	TableAndCurrencyID string         `json:"tableAndCurrencyID,omitempty"`
 	PragmaticTable     PragmaticTable `json:"pragmaticTable"`
 }
-
-//func (pt PragmaticTable) Marshal() ([]byte, error) {
-//	jsonPT, err := json.Marshal(pt)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return jsonPT, nil
-//}
-//
-//func (pt PragmaticTable)  {
-//
-//}
-
-//// CreateTableCurrencyID returns a unique ID based on PragmaticTable's TableId and Currency
-//// Generated ID => TableId + Currency
-//func (pt PragmaticTable) CreateTableCurrencyID() string {
-//	return pt.TableId + ":" + pt.Currency
-//}

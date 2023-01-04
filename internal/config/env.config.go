@@ -12,7 +12,6 @@ const (
 	CasinoID            = "CASINO_ID"
 	TableIDs            = "TABLE_IDS"
 	CurrencyIDs         = "CURRENCY_IDS"
-	RedisPort           = "REDIS_PORT"
 	ServerPort          = "SERVER_PORT"
 	PusherChannelID     = "PUSHER_CHANNEL_ID"
 	PusherPeriodMinutes = "PUSHER_PERIOD_MINUTES"
@@ -27,7 +26,6 @@ type ENV struct {
 	CasinoID            string
 	TableIDs            string
 	CurrencyIDs         string
-	RedisPort           string
 	ServerPort          string
 	PusherChannelID     string
 	PusherPeriodMinutes string
@@ -42,7 +40,6 @@ func (env *ENV) Load() *ENV {
 	env.CasinoID = os.Getenv(CasinoID)
 	env.TableIDs = os.Getenv(TableIDs)
 	env.CurrencyIDs = os.Getenv(CurrencyIDs)
-	env.RedisPort = os.Getenv(RedisPort)
 	env.ServerPort = os.Getenv(ServerPort)
 	env.PusherChannelID = os.Getenv(PusherChannelID)
 	env.PusherPeriodMinutes = os.Getenv(PusherPeriodMinutes)
@@ -56,35 +53,35 @@ func (env *ENV) Load() *ENV {
 
 // TODO: Reflection can make your life easier. Give this present to yourself this new year :)
 
+func (env *ENV) GetPragmaticFeedWsURL() string {
+	panicOnEmptyEnvVar(PragmaticFeedWsURL, env.PragmaticFeedWsURL)
+	return strCleanUp(env.PragmaticFeedWsURL)
+}
+
 func (env *ENV) GetTableIDs() []string {
 	res := strings.Split(strCleanUp(env.TableIDs), ",")
-	checkEnvVarOnEmptiness(TableIDs, res)
+	panicOnEmptyEnvVar(TableIDs, res)
 	return res
 }
 
 func (env *ENV) GetCurrencyIDs() []string {
 	res := strings.Split(strCleanUp(env.CurrencyIDs), ",")
-	checkEnvVarOnEmptiness(CurrencyIDs, res)
+	panicOnEmptyEnvVar(CurrencyIDs, res)
 	return res
 }
 
 func (env *ENV) GetCasinoID() string {
-	checkEnvVarOnEmptiness(CasinoID, env.CasinoID)
+	panicOnEmptyEnvVar(CasinoID, env.CasinoID)
 	return strCleanUp(env.CasinoID)
 }
 
-func (env *ENV) GetRedisPort() string {
-	checkEnvVarOnEmptiness(RedisPort, env.RedisPort)
-	return strCleanUp(env.RedisPort)
-}
-
 func (env *ENV) GetServerPort() string {
-	checkEnvVarOnEmptiness(ServerPort, env.ServerPort)
+	panicOnEmptyEnvVar(ServerPort, env.ServerPort)
 	return strCleanUp(env.ServerPort)
 }
 
 func (env *ENV) GetPusherChannelID() string {
-	checkEnvVarOnEmptiness(PusherChannelID, env.PusherChannelID)
+	panicOnEmptyEnvVar(PusherChannelID, env.PusherChannelID)
 	return strCleanUp(env.PusherChannelID)
 }
 
@@ -94,26 +91,26 @@ func (env *ENV) GetPusherPeriodMinutes() int {
 	if err != nil {
 		log.Fatalf("Error convertin %s to int", PusherPeriodMinutes)
 	}
-	checkEnvVarOnEmptiness(PusherPeriodMinutes, minutes)
+	panicOnEmptyEnvVar(PusherPeriodMinutes, minutes)
 	return minutes
 }
 
 func (env *ENV) GetPusherAppID() string {
-	checkEnvVarOnEmptiness(PusherAppID, env.PusherAppID)
+	panicOnEmptyEnvVar(PusherAppID, env.PusherAppID)
 	return strCleanUp(env.PusherAppID)
 }
 
 func (env *ENV) GetPusherKey() string {
-	checkEnvVarOnEmptiness(PusherKey, env.PusherKey)
+	panicOnEmptyEnvVar(PusherKey, env.PusherKey)
 	return strCleanUp(env.PusherKey)
 }
 
 func (env *ENV) GetPusherSecret() string {
-	checkEnvVarOnEmptiness(PusherSecret, env.PusherSecret)
+	panicOnEmptyEnvVar(PusherSecret, env.PusherSecret)
 	return strCleanUp(env.PusherSecret)
 }
 
 func (env *ENV) GetPusherCluster() string {
-	checkEnvVarOnEmptiness(PusherCluster, env.PusherCluster)
+	panicOnEmptyEnvVar(PusherCluster, env.PusherCluster)
 	return strCleanUp(env.PusherCluster)
 }

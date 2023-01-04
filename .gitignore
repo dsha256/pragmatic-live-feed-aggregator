@@ -56,3 +56,10 @@ atlassian-ide-plugin.xml
 
 # Dummy files
 response.json
+dummy.go
+
+# Logs
+log.log
+
+# Binary
+bin

@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/config"
-	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/pusher"
-	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/repo"
+	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/pragmaticlivefeed"
+	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/repository"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/server"
-	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/ws"
-	"github.com/go-redis/redis/v8"
+	"github.com/pusher/pusher-http-go/v5"
 	"log"
 	"net/http"
 )
@@ -18,47 +17,70 @@ func main() {
 }
 
 func start() {
+
 	env := config.ENV{}
 	env.Load()
-
-	ctx := context.Background()
-
-	redisPort := env.GetRedisPort()
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "redis:" + redisPort,
-		Password: "",
-		DB:       0,
-	})
-	redisRepo := repo.NewRedisRepository(redisClient)
-
-	httpServer := server.NewHTTP(&redisRepo)
+	pragmaticFeedWsURL := env.GetPragmaticFeedWsURL()
+	_ = pragmaticFeedWsURL
+	casinoID := env.GetCasinoID()
+	_ = casinoID
+	tableIDs := env.GetTableIDs()
+	_ = tableIDs
+	currencyIDs := env.GetCurrencyIDs()
+	_ = currencyIDs
 	serverPort := env.GetServerPort()
+	pusherChannelID := env.GetPusherChannelID()
+	_ = pusherChannelID
+	pusherPeriodMinutes := env.GetPusherPeriodMinutes()
+	_ = pusherPeriodMinutes
+	pusherAppID := env.GetPusherAppID()
+	_ = pusherAppID
+	pusherKey := env.GetPusherKey()
+	_ = pusherKey
+	pusherSecret := env.GetPusherSecret()
+	_ = pusherSecret
+	pusherCluster := env.GetPusherCluster()
+	_ = pusherCluster
+	ctx := context.Background()
+	_ = ctx
+
+	aggregateRepo := repository.NewAggregator()
+	service := pragmaticlivefeed.NewService(aggregateRepo)
+
+	httpServer := server.NewHTTP(service)
+
 	go func() {
 		err := http.ListenAndServe(fmt.Sprintf(":%s", serverPort), httpServer)
 		if err != nil {
-			log.Fatalf("Error starting a server on port %s: %s", serverPort, err)
+			panicOnErr(err, fmt.Sprintf("failed to start server on port %s", serverPort))
 		}
 	}()
 
-	pusherClient := pusher.NewClient(
-		env.GetPusherAppID(),
-		env.GetPusherKey(),
-		env.GetPusherSecret(),
-		env.GetPusherCluster(),
-		env.GetPusherChannelID(),
-		env.GetPusherPeriodMinutes(),
-		&redisRepo,
-	)
-	pusherClient.StartPushing(ctx)
+	//err := http.ListenAndServe(fmt.Sprintf(":%s", serverPort), httpServer)
+	//if err != nil {
+	//	panicOnErr(err, fmt.Sprintf("failed to start server on port %s", serverPort))
+	//}
+
+	pusherClient := pusher.Client{
+		AppID:   pusherAppID,
+		Key:     pusherKey,
+		Secret:  pusherSecret,
+		Cluster: pusherCluster,
+		Secure:  true,
+	}
+	pusherSvc := pragmaticlivefeed.NewPusherService(&pusherClient, pusherChannelID, pusherPeriodMinutes, aggregateRepo)
+	_ = pusherSvc
+	//pusherSvc.StartPushing(ctx)
 
 	// TODO: improve the runner func related processes synchronization using the channels to avoid strict ordering.
 	// At this time, the code below must be at the end of the runner func, cause it takes an additional responsibility
 	// to force the main thread to wait until all the other services are done their works.
-	wsURL := env.PragmaticFeedWsURL
-	casinoID := env.GetCasinoID()
-	tableIDs := env.GetTableIDs()
-	currencyIDs := env.GetCurrencyIDs()
-	wsClient := ws.NewClient(ctx, &redisRepo, wsURL, casinoID, tableIDs, currencyIDs)
-	//_ = wsClient
+	wsClient := pragmaticlivefeed.NewWSService(ctx, aggregateRepo, pragmaticFeedWsURL, casinoID, tableIDs, currencyIDs)
 	wsClient.StartClients()
+}
+
+func panicOnErr(err error, msg string) {
+	if err != nil {
+		log.Panic(msg, err)
+	}
 }
