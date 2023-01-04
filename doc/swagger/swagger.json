@@ -10,6 +10,30 @@
     "host": "localhost:8080",
     "basePath": "/api/v1/pragmatic_live_feed",
     "paths": {
+        "/tables/health": {
+            "get": {
+                "description": "Returns all available live tables",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "example"
+                ],
+                "summary": "Returns all available live tables",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.Response"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/tables": {
             "get": {
                 "description": "Returns all available live tables",
@@ -51,7 +75,8 @@
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "integer"
+                    "type": "integer",
+                    "default": 200
                 },
                 "data": {},
                 "error": {
@@ -62,7 +87,8 @@
                     "type": "string"
                 },
                 "status": {
-                    "type": "integer"
+                    "type": "integer",
+                    "default": 200
                 }
             }
         },
