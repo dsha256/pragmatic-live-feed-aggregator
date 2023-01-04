@@ -1,12 +1,12 @@
-package repo
+package repository
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/pkg/dto"
+	"github.com/dsha256/pragmatic-live-feed-aggregator/pkg/utils"
 	"github.com/go-redis/redis/v8"
-	"sync"
 )
 
 var (
@@ -14,41 +14,33 @@ var (
 	ErrRedisInternal   = errors.New("redis internal error")
 )
 
-type RedisRepository struct {
-	sync.RWMutex
-	Client *redis.Client
+type RedisLiveFeedRepository struct {
+	client *redis.Client
 }
 
-func NewRedisRepository(client *redis.Client) RedisRepository {
-	return RedisRepository{
-		sync.RWMutex{},
+func NewRedisLiveFeedRepository(client *redis.Client) *RedisLiveFeedRepository {
+	return &RedisLiveFeedRepository{
 		client,
 	}
 }
 
-func (db *RedisRepository) AddTable(ctx context.Context, table dto.PragmaticTable) error {
-	db.Lock()
-	defer db.Unlock()
-
-	redisID := generateIDFromTableAndCurrencyIDs(table.TableId, table.Currency)
+func (db *RedisLiveFeedRepository) AddTable(ctx context.Context, table dto.PragmaticTable) error {
+	redisID := utils.GenerateIDFromTableAndCurrencyIDs(table.TableId, table.Currency)
 
 	jsonPragmaticTable, err := json.Marshal(table)
 	if err != nil {
 		return err
 	}
 
-	db.Client.Set(ctx, redisID, jsonPragmaticTable, 0)
+	db.client.Set(ctx, redisID, jsonPragmaticTable, 0)
 	return nil
 }
 
-func (db *RedisRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, tableID, currencyID string) (dto.PragmaticTable, error) {
-	db.Lock()
-	defer db.Unlock()
-
+func (db *RedisLiveFeedRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, tableID, currencyID string) (dto.PragmaticTable, error) {
 	var pragmaticTable dto.PragmaticTable
 
-	tableUniqueID := generateIDFromTableAndCurrencyIDs(tableID, currencyID)
-	table, err := db.Client.Get(ctx, tableUniqueID).Result()
+	tableUniqueID := utils.GenerateIDFromTableAndCurrencyIDs(tableID, currencyID)
+	table, err := db.client.Get(ctx, tableUniqueID).Result()
 	switch {
 	case err == redis.Nil:
 		return dto.PragmaticTable{}, ErrKeyDoesNotExist
@@ -64,21 +56,18 @@ func (db *RedisRepository) GetTableByTableAndCurrencyIDs(ctx context.Context, ta
 	return pragmaticTable, nil
 }
 
-func (db *RedisRepository) ListTables(ctx context.Context) ([]dto.PragmaticTableWithID, error) {
-	db.Lock()
-	defer db.Unlock()
-
+func (db *RedisLiveFeedRepository) ListTables(ctx context.Context) ([]dto.PragmaticTableWithID, error) {
 	var pragmaticTables []dto.PragmaticTableWithID
 	var cursor uint64
 	var table string
 
-	keys, cursor, err := db.Client.Scan(ctx, cursor, "*:*", 0).Result()
+	keys, cursor, err := db.client.Scan(ctx, cursor, "*:*", 0).Result()
 	if err != nil {
 		return pragmaticTables, err
 	}
 
 	for _, key := range keys {
-		table, err = db.Client.Get(ctx, key).Result()
+		table, err = db.client.Get(ctx, key).Result()
 		if err != nil {
 			return []dto.PragmaticTableWithID{}, err
 		}

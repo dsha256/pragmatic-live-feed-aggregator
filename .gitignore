@@ -56,3 +56,6 @@ atlassian-ide-plugin.xml
 
 # Dummy files
 response.json
+
+# Logs
+log.log
