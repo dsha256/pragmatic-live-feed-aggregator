@@ -110,5 +110,7 @@ docker-compose up
    API error response: \
    At this time, you're not getting anything in this case.
 
+---
+
 # P.S
 ### You can always open any type of issue with an epic MEME in it. Just use the #meme tag, please. :wink: :snowman_with_snow: :santa:
