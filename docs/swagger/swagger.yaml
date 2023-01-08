@@ -1,0 +1,122 @@
+basePath: /api/v1/pragmatic_live_feed
+definitions:
+  dto.PragmaticTable:
+    properties:
+      currency:
+        type: string
+      dealer:
+        properties:
+          name:
+            type: string
+        type: object
+      languageSpecificTableInfo:
+        type: string
+      last20Results:
+        items:
+          properties:
+            color:
+              type: string
+            gameId:
+              type: string
+            powerUpList:
+              items: {}
+              type: array
+            powerUpMultipliers:
+              items: {}
+              type: array
+            result:
+              type: integer
+            time:
+              type: string
+          type: object
+        type: array
+      newTable:
+        type: boolean
+      tableId:
+        type: string
+      tableImage:
+        type: string
+      tableLimits:
+        properties:
+          maxBet:
+            type: number
+          maxPlayers:
+            type: integer
+          minBet:
+            type: number
+          ranges:
+            items:
+              type: number
+            type: array
+        type: object
+      tableName:
+        type: string
+      tableOpen:
+        type: boolean
+      tableSubtype:
+        type: string
+      tableType:
+        type: string
+      totalSeatedPlayers:
+        type: integer
+    type: object
+  dto.PragmaticTableWithID:
+    properties:
+      pragmaticTable:
+        $ref: '#/definitions/dto.PragmaticTable'
+      tableAndCurrencyID:
+        description: tID = 100; cID = 200 => TableAndCurrencyID = "100:200"
+        type: string
+    type: object
+  dto.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      error:
+        type: boolean
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: Pragmatic Live Feed API Documentation
+  version: 1.0.0
+paths:
+  /tables:
+    get:
+      consumes:
+      - application/json
+      description: List Pragmatic live feed tables data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.PragmaticTableWithID'
+                  type: array
+              type: object
+      summary: List Pragmatic live feed tables data
+  /tables/health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the service is up
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Check if the service is up
+swagger: "2.0"

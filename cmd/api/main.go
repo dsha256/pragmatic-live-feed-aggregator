@@ -8,10 +8,16 @@ import (
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/repository"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/server"
 	"github.com/pusher/pusher-http-go/v5"
+	_ "github.com/swaggo/files"
+	_ "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 )
 
+// @title Pragmatic Live Feed API Documentation
+// @version 1.0.0
+// @host localhost:8080
+// @BasePath /api/v1/pragmatic_live_feed
 func main() {
 	start()
 }
@@ -73,8 +79,8 @@ func start() {
 	//pusherSvc.StartPushing(ctx)
 
 	// TODO: improve the runner func related processes synchronization using the channels to avoid strict ordering.
-	// At this time, the code below must be at the end of the runner func, cause it takes an additional responsibility
-	// to force the main thread to wait until all the other services are done their works.
+	// 	At this time, the code below must be at the end of the runner func, cause it takes an additional responsibility
+	// 	to force the main thread to wait until all the other services are done their works.
 	wsClient := pragmaticlivefeed.NewWSService(ctx, aggregateRepo, pragmaticFeedWsURL, casinoID, tableIDs, currencyIDs)
 	wsClient.StartClients()
 }

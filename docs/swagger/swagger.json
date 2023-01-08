@@ -1,0 +1,190 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Pragmatic Live Feed API Documentation",
+        "contact": {},
+        "version": "1.0.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1/pragmatic_live_feed",
+    "paths": {
+        "/tables": {
+            "get": {
+                "description": "List Pragmatic live feed tables data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List Pragmatic live feed tables data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.PragmaticTableWithID"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/tables/health": {
+            "get": {
+                "description": "Check if the service is up",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Check if the service is up",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.PragmaticTable": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "dealer": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "languageSpecificTableInfo": {
+                    "type": "string"
+                },
+                "last20Results": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "color": {
+                                "type": "string"
+                            },
+                            "gameId": {
+                                "type": "string"
+                            },
+                            "powerUpList": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "powerUpMultipliers": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "result": {
+                                "type": "integer"
+                            },
+                            "time": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "newTable": {
+                    "type": "boolean"
+                },
+                "tableId": {
+                    "type": "string"
+                },
+                "tableImage": {
+                    "type": "string"
+                },
+                "tableLimits": {
+                    "type": "object",
+                    "properties": {
+                        "maxBet": {
+                            "type": "number"
+                        },
+                        "maxPlayers": {
+                            "type": "integer"
+                        },
+                        "minBet": {
+                            "type": "number"
+                        },
+                        "ranges": {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                },
+                "tableName": {
+                    "type": "string"
+                },
+                "tableOpen": {
+                    "type": "boolean"
+                },
+                "tableSubtype": {
+                    "type": "string"
+                },
+                "tableType": {
+                    "type": "string"
+                },
+                "totalSeatedPlayers": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.PragmaticTableWithID": {
+            "type": "object",
+            "properties": {
+                "pragmaticTable": {
+                    "$ref": "#/definitions/dto.PragmaticTable"
+                },
+                "tableAndCurrencyID": {
+                    "description": "tID = 100; cID = 200 =\u003e TableAndCurrencyID = \"100:200\"",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "error": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

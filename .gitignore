@@ -63,3 +63,6 @@ log.log
 
 # Binary
 bin
+
+# SWAGGER
+gen

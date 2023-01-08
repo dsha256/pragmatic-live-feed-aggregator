@@ -4,6 +4,8 @@
 ## How the app solves the problem?  
 ### Pragmatic Live Feed Aggregator aggregates all available live tables and delivers to web clients on demand in one big batch.
 
+---
+
 # RUN in Docker Compose - Locally
 ### For running the app locally you just need to create `.env` file in the project root directory with the following environment variables in it:
 ```dotenv
@@ -25,9 +27,15 @@ PUSHER_CLUSTER= Pusher.com's app cluster
 docker-compose up
 ```
 
+---
+
 # See the result in your favorite Web Browser
 ### After running the app in Docker Compose, you need to open your favorite web browser and go to the following links:
-1. Get the Pragmatic Live Feed aggregated data as a one big batch: \
+
+1. All endpoints - SWAGGER UI
+   ``http://localhost:[PORT]/swagger/index.html``
+
+2. Get the Pragmatic Live Feed aggregated data as a one big batch: \
     ```http://localhost:[PORT]/api/v1/pragmatic_news_feed/tables``` \
    Where `PORT` is `SERVER_PORT` from the `.env` file. \
    API success response:
@@ -86,7 +94,7 @@ docker-compose up
     }
     ```
    
-2. Check the previous endpoint health: \
+3. Check the previous endpoint health: \
     ```http://localhost:[PORT]/api/v1/pragmatic_news_feed/tables/health``` \
    Where `PORT` is `SERVER_PORT` from the `.env` file. \
    API success response:
