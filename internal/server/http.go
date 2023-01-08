@@ -1,8 +1,11 @@
 package server
 
 import (
+	_ "github.com/dsha256/pragmatic-live-feed-aggregator/docs/swagger"
 	"github.com/dsha256/pragmatic-live-feed-aggregator/internal/pragmaticlivefeed"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
 )
 
@@ -19,7 +22,8 @@ func NewHTTP(pragmaticLiveFeedSvc pragmaticlivefeed.Service) *HTTP {
 	server := &HTTP{Handler: engine, engine: engine}
 
 	// Swagger UI
-	engine.StaticFS("/doc/swagger", http.Dir("doc/swagger"))
+	url := ginSwagger.URL("http://localhost:8080/swagger/doc.json")
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	pragmaticLiveFeedRoute := engine.Group("api/v1/pragmatic_live_feed")
 
