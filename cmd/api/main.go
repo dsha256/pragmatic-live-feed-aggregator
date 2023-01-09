@@ -12,6 +12,9 @@ import (
 	_ "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 // @title Pragmatic Live Feed API Documentation
@@ -19,36 +22,44 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1/pragmatic_live_feed
 func main() {
-	start()
+	errC, err := bootstrap()
+	if err != nil {
+		log.Fatalf("Couldn't run: %s", err)
+	}
+
+	if err := <-errC; err != nil {
+		log.Fatalf("Error while running: %s", err)
+	}
 }
 
-func start() {
+func bootstrap() (<-chan error, error) {
+	errC := make(chan error, 1)
+	ctx, stop := signal.NotifyContext(context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+		syscall.SIGQUIT)
+
+	go func() {
+		<-ctx.Done()
+		defer func() {
+			stop()
+			close(errC)
+		}()
+	}()
 
 	env := config.ENV{}
 	env.Load()
 	pragmaticFeedWsURL := env.GetPragmaticFeedWsURL()
-	_ = pragmaticFeedWsURL
 	casinoID := env.GetCasinoID()
-	_ = casinoID
 	tableIDs := env.GetTableIDs()
-	_ = tableIDs
 	currencyIDs := env.GetCurrencyIDs()
-	_ = currencyIDs
 	serverPort := env.GetServerPort()
 	pusherChannelID := env.GetPusherChannelID()
-	_ = pusherChannelID
 	pusherPeriodMinutes := env.GetPusherPeriodMinutes()
-	_ = pusherPeriodMinutes
 	pusherAppID := env.GetPusherAppID()
-	_ = pusherAppID
 	pusherKey := env.GetPusherKey()
-	_ = pusherKey
 	pusherSecret := env.GetPusherSecret()
-	_ = pusherSecret
 	pusherCluster := env.GetPusherCluster()
-	_ = pusherCluster
-	ctx := context.Background()
-	_ = ctx
 
 	aggregateRepo := repository.NewAggregator()
 	service := pragmaticlivefeed.NewService(aggregateRepo)
@@ -58,14 +69,9 @@ func start() {
 	go func() {
 		err := http.ListenAndServe(fmt.Sprintf(":%s", serverPort), httpServer)
 		if err != nil {
-			panicOnErr(err, fmt.Sprintf("failed to start server on port %s", serverPort))
+			errC <- err
 		}
 	}()
-
-	//err := http.ListenAndServe(fmt.Sprintf(":%s", serverPort), httpServer)
-	//if err != nil {
-	//	panicOnErr(err, fmt.Sprintf("failed to start server on port %s", serverPort))
-	//}
 
 	pusherClient := pusher.Client{
 		AppID:   pusherAppID,
@@ -75,18 +81,10 @@ func start() {
 		Secure:  true,
 	}
 	pusherSvc := pragmaticlivefeed.NewPusherService(&pusherClient, pusherChannelID, pusherPeriodMinutes, aggregateRepo)
-	_ = pusherSvc
-	//pusherSvc.StartPushing(ctx)
+	pusherSvc.StartPushing(ctx)
 
-	// TODO: improve the runner func related processes synchronization using the channels to avoid strict ordering.
-	// 	At this time, the code below must be at the end of the runner func, cause it takes an additional responsibility
-	// 	to force the main thread to wait until all the other services are done their works.
 	wsClient := pragmaticlivefeed.NewWSService(ctx, aggregateRepo, pragmaticFeedWsURL, casinoID, tableIDs, currencyIDs)
 	wsClient.StartClients()
-}
 
-func panicOnErr(err error, msg string) {
-	if err != nil {
-		log.Panic(msg, err)
-	}
+	return errC, nil
 }
