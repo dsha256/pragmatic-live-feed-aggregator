@@ -73,6 +73,39 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.Dealer": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Last20Results": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "gameId": {
+                    "type": "string"
+                },
+                "powerUpList": {
+                    "type": "array",
+                    "items": {}
+                },
+                "powerUpMultipliers": {
+                    "type": "array",
+                    "items": {}
+                },
+                "result": {
+                    "type": "integer"
+                },
+                "time": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.PragmaticTable": {
             "type": "object",
             "properties": {
@@ -80,12 +113,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "dealer": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/dto.Dealer"
                 },
                 "languageSpecificTableInfo": {
                     "type": "string"
@@ -93,29 +121,7 @@ const docTemplate = `{
                 "last20Results": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "color": {
-                                "type": "string"
-                            },
-                            "gameId": {
-                                "type": "string"
-                            },
-                            "powerUpList": {
-                                "type": "array",
-                                "items": {}
-                            },
-                            "powerUpMultipliers": {
-                                "type": "array",
-                                "items": {}
-                            },
-                            "result": {
-                                "type": "integer"
-                            },
-                            "time": {
-                                "type": "string"
-                            }
-                        }
+                        "$ref": "#/definitions/dto.Last20Results"
                     }
                 },
                 "newTable": {
@@ -128,24 +134,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "tableLimits": {
-                    "type": "object",
-                    "properties": {
-                        "maxBet": {
-                            "type": "number"
-                        },
-                        "maxPlayers": {
-                            "type": "integer"
-                        },
-                        "minBet": {
-                            "type": "number"
-                        },
-                        "ranges": {
-                            "type": "array",
-                            "items": {
-                                "type": "number"
-                            }
-                        }
-                    }
+                    "$ref": "#/definitions/dto.TableLimits"
                 },
                 "tableName": {
                     "type": "string"
@@ -191,6 +180,26 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.TableLimits": {
+            "type": "object",
+            "properties": {
+                "maxBet": {
+                    "type": "number"
+                },
+                "maxPlayers": {
+                    "type": "integer"
+                },
+                "minBet": {
+                    "type": "number"
+                },
+                "ranges": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
                 }
             }
         }
