@@ -1,34 +1,38 @@
 basePath: /api/v1/pragmatic_live_feed
 definitions:
+  dto.Dealer:
+    properties:
+      name:
+        type: string
+    type: object
+  dto.Last20Results:
+    properties:
+      color:
+        type: string
+      gameId:
+        type: string
+      powerUpList:
+        items: {}
+        type: array
+      powerUpMultipliers:
+        items: {}
+        type: array
+      result:
+        type: integer
+      time:
+        type: string
+    type: object
   dto.PragmaticTable:
     properties:
       currency:
         type: string
       dealer:
-        properties:
-          name:
-            type: string
-        type: object
+        $ref: '#/definitions/dto.Dealer'
       languageSpecificTableInfo:
         type: string
       last20Results:
         items:
-          properties:
-            color:
-              type: string
-            gameId:
-              type: string
-            powerUpList:
-              items: {}
-              type: array
-            powerUpMultipliers:
-              items: {}
-              type: array
-            result:
-              type: integer
-            time:
-              type: string
-          type: object
+          $ref: '#/definitions/dto.Last20Results'
         type: array
       newTable:
         type: boolean
@@ -37,18 +41,7 @@ definitions:
       tableImage:
         type: string
       tableLimits:
-        properties:
-          maxBet:
-            type: number
-          maxPlayers:
-            type: integer
-          minBet:
-            type: number
-          ranges:
-            items:
-              type: number
-            type: array
-        type: object
+        $ref: '#/definitions/dto.TableLimits'
       tableName:
         type: string
       tableOpen:
@@ -79,6 +72,19 @@ definitions:
         type: string
       status:
         type: integer
+    type: object
+  dto.TableLimits:
+    properties:
+      maxBet:
+        type: number
+      maxPlayers:
+        type: integer
+      minBet:
+        type: number
+      ranges:
+        items:
+          type: number
+        type: array
     type: object
 host: localhost:8080
 info:
